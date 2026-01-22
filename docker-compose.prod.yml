@@ -1,6 +1,6 @@
 # This is a production version of the Bigcapital docker-compose.yml file.
 
-version: '3.3'
+version: "3.3"
 
 services:
   proxy:
@@ -8,9 +8,6 @@ services:
     depends_on:
       - server
       - webapp
-    ports:
-      - '${PUBLIC_PROXY_PORT:-80}:80'
-      - '${PUBLIC_PROXY_SSL_PORT:-443}:443'
     tty: true
     volumes:
       - ./docker/envoy/envoy.yaml:/etc/envoy/envoy.yaml
@@ -29,7 +26,7 @@ services:
     container_name: bigcapital-server
     image: bigcapitalhq/server:latest
     expose:
-      - '3000'
+      - "3000"
     links:
       - mysql
       - redis
@@ -121,6 +118,7 @@ services:
       - STRIPE_PAYMENT_WEBHOOKS_SECRET=${STRIPE_PAYMENT_WEBHOOKS_SECRET}
       - STRIPE_PAYMENT_REDIRECT_URL=${STRIPE_PAYMENT_REDIRECT_URL}
 
+      - MONGODB_DATABASE_URL=${MONGODB_DATABASE_URL}
   database_migration:
     container_name: bigcapital-database-migration
     build:
@@ -153,7 +151,7 @@ services:
     volumes:
       - mysql:/var/lib/mysql
     expose:
-      - '3306'
+      - "3306"
     networks:
       - bigcapital_network
 
@@ -163,7 +161,7 @@ services:
     build:
       context: ./docker/redis
     expose:
-      - '6379'
+      - "6379"
     volumes:
       - redis:/data
     networks:
@@ -172,7 +170,7 @@ services:
   gotenberg:
     image: gotenberg/gotenberg:7
     expose:
-      - '9000'
+      - "9000"
     networks:
       - bigcapital_network
 
