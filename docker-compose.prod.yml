@@ -124,6 +124,7 @@ services:
     build:
       context: ./
       dockerfile: docker/migration/Dockerfile
+    restart: "no"
     environment:
       # Database
       - DB_HOST=mysql
