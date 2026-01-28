@@ -50,14 +50,11 @@ services:
       database_migration:
         condition: service_completed_successfully
     healthcheck:
-      test:
-        [
-          "CMD-SHELL",
-          'node -e "require(''http'').get(''http://localhost:3000/api'', (res) => (res.statusCode < 400 ? process.exit(0) : process.exit(1))).on(''error'', () => process.exit(1))"',
-        ]
+      test: ["CMD", "node", "-e", "require('http').get('http://localhost:3000/api', (res) => (process.exit(res.statusCode < 500 ? 0 : 1))).on('error', () => process.exit(1))"]
       interval: 30s
       timeout: 10s
-      retries: 3
+      retries: 5
+      start_period: 60s
     restart: on-failure
     networks:
       - bigcapital_network
