@@ -6,8 +6,15 @@ services:
   proxy:
     image: envoyproxy/envoy:v1.30-latest
     depends_on:
-      - server
-      - webapp
+      server:
+        condition: service_healthy
+      webapp:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "bash -c ':> /dev/tcp/127.0.0.1/80' || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
     tty: true
     volumes:
       - ./docker/envoy/envoy.yaml:/etc/envoy/envoy.yaml
@@ -19,6 +26,11 @@ services:
     container_name: bigcapital-webapp
     image: bigcapitalhq/webapp:latest
     restart: on-failure
+    healthcheck:
+      test: ["CMD-SHELL", "bash -c ':> /dev/tcp/127.0.0.1/80' || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
     networks:
       - bigcapital_network
 
@@ -31,8 +43,21 @@ services:
       - mysql
       - redis
     depends_on:
-      - mysql
-      - redis
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      database_migration:
+        condition: service_completed_successfully
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          'node -e "require(''http'').get(''http://localhost:3000/api'', (res) => (res.statusCode < 400 ? process.exit(0) : process.exit(1))).on(''error'', () => process.exit(1))"',
+        ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
     restart: on-failure
     networks:
       - bigcapital_network
@@ -135,7 +160,8 @@ services:
       # Tenants databases
       - TENANT_DB_NAME_PERFIX=${TENANT_DB_NAME_PERFIX}
     depends_on:
-      - mysql
+      mysql:
+        condition: service_healthy
     networks:
       - bigcapital_network
 
@@ -149,6 +175,15 @@ services:
       - MYSQL_USER=${DB_USER}
       - MYSQL_PASSWORD=${DB_PASSWORD}
       - MYSQL_ROOT_PASSWORD=${DB_ROOT_PASSWORD}
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "export MYSQL_PWD=$$MYSQL_ROOT_PASSWORD; mysqladmin ping -h localhost -u root",
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
     volumes:
       - mysql:/var/lib/mysql
     expose:
@@ -161,6 +196,11 @@ services:
     restart: on-failure
     build:
       context: ./docker/redis
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
     expose:
       - "6379"
     volumes:
@@ -170,6 +210,11 @@ services:
 
   gotenberg:
     image: gotenberg/gotenberg:7
+    healthcheck:
+      test: ["CMD-SHELL", "bash -c ':> /dev/tcp/127.0.0.1/3000' || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
     expose:
       - "9000"
     networks:
