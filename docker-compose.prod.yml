@@ -24,9 +24,7 @@ services:
 
   webapp:
     container_name: bigcapital-webapp
-    build:
-      context: ./
-      dockerfile: packages/webapp/Dockerfile
+    image: bigcapitalhq/webapp:v0.25.23
     restart: on-failure
     healthcheck:
       test: ["CMD-SHELL", "bash -c ':> /dev/tcp/127.0.0.1/80' || exit 1"]
@@ -38,7 +36,7 @@ services:
 
   server:
     container_name: bigcapital-server
-    image: bigcapitalhq/server:latest
+    image: bigcapitalhq/server:v0.25.23
     expose:
       - "3000"
     links:
