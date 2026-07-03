@@ -24,7 +24,9 @@ services:
 
   webapp:
     container_name: bigcapital-webapp
-    image: bigcapitalhq/webapp:latest
+    build:
+      context: ./
+      dockerfile: packages/webapp/Dockerfile
     restart: on-failure
     healthcheck:
       test: ["CMD-SHELL", "bash -c ':> /dev/tcp/127.0.0.1/80' || exit 1"]
