@@ -15,8 +15,10 @@ RUN apk add python3 build-base chromium
 ENV PYTHON=/usr/bin/python3
 
 # Install pnpm packages dependencies
-RUN npm install -g pnpm
-RUN pnpm install
+# Pin pnpm 8: it supports Node 18 and matches the repo's lockfileVersion 6.0.
+# The latest pnpm (v11) requires Node 22+ and fails on this Node 18 image.
+RUN npm install -g pnpm@8
+RUN pnpm install --no-frozen-lockfile
 
 # Build webapp package
 RUN pnpm run build:webapp
