@@ -27,7 +27,8 @@ services:
     image: bigcapitalhq/webapp:v0.25.23
     restart: on-failure
     healthcheck:
-      test: ["CMD-SHELL", "bash -c ':> /dev/tcp/127.0.0.1/80' || exit 1"]
+      # nginx:alpine has no bash; use wget (busybox) to probe port 80.
+      test: ["CMD-SHELL", "wget -q -O /dev/null http://127.0.0.1:80/ || exit 1"]
       interval: 30s
       timeout: 10s
       retries: 3
