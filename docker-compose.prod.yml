@@ -83,6 +83,13 @@ services:
       - QUEUE_HOST=redis
       - QUEUE_PORT=6379
 
+      # Rate limiting (defaults 100/min global, 10/min auth are too low
+      # for the SPA's burst of requests on load)
+      - THROTTLE_GLOBAL_LIMIT=1000
+      - THROTTLE_GLOBAL_TTL=60000
+      - THROTTLE_AUTH_LIMIT=50
+      - THROTTLE_AUTH_TTL=60000
+
       # System database
       - SYSTEM_DB_NAME=${SYSTEM_DB_NAME}
 
